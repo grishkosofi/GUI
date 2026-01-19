@@ -4,6 +4,11 @@ const adjustmentKnob = document.getElementById('adjustment-knob');
 const okButton = document.getElementById('ok-button');
 const startButton = document.getElementById('start-button');
 
+// Constants for knob rotation calculations
+const MODE_DEGREES_PER_STEP = 72; // 360° / 5 modes
+const POWER_DEGREES_PER_LEVEL = 36; // 360° / 10 power levels
+const TIMER_DEGREES_PER_STEP = 6; // For timer granularity
+
 // State variables
 let mode = '';
 let modeIndex = 0;
@@ -65,6 +70,15 @@ document.addEventListener('mouseup', () => {
     onRotateCallback = null;
 });
 
+// Reset state to initial values
+function resetState() {
+    mode = '';
+    power = 0;
+    timerMinutes = 0;
+    isTimerSet = false;
+    updateDisplay();
+}
+
 // Update display
 function updateDisplay() {
     if (isCooking) {
@@ -85,8 +99,8 @@ makeKnobRotatable(selectionKnob, (rotation) => {
     // Normalize rotation to 0-360 range
     const normalizedRotation = ((rotation % 360) + 360) % 360;
     
-    // Calculate mode index based on rotation (5 modes, so 72 degrees per mode)
-    const newModeIndex = Math.floor(normalizedRotation / 72) % 5;
+    // Calculate mode index based on rotation
+    const newModeIndex = Math.floor(normalizedRotation / MODE_DEGREES_PER_STEP) % modes.length;
     
     if (newModeIndex !== modeIndex) {
         modeIndex = newModeIndex;
@@ -111,12 +125,12 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
     
     if (!isTimerSet) {
         // Setting power (1-10 range)
-        power = Math.floor(normalizedRotation / 36) + 1;
+        power = Math.floor(normalizedRotation / POWER_DEGREES_PER_LEVEL) + 1;
         if (power > 10) power = 10;
         updateDisplay();
     } else {
         // Setting timer after OK pressed (0-300 minutes in steps of 5)
-        timerMinutes = Math.floor(normalizedRotation / 6) * 5;
+        timerMinutes = Math.floor(normalizedRotation / TIMER_DEGREES_PER_STEP) * 5;
         if (timerMinutes > 300) timerMinutes = 300; // Max 5 hours
         updateDisplay();
     }
@@ -158,12 +172,7 @@ startButton.addEventListener('click', () => {
         }
         startButton.textContent = 'Start';
         displayText.textContent = 'Cooking stopped';
-        setTimeout(() => {
-            timerMinutes = 0;
-            isTimerSet = false;
-            power = 0;
-            updateDisplay();
-        }, 2000);
+        setTimeout(resetState, 2000);
         return;
     }
     
@@ -185,13 +194,7 @@ startButton.addEventListener('click', () => {
             isCooking = false;
             startButton.textContent = 'Start';
             displayText.textContent = 'DONE! Enjoy your meal!';
-            setTimeout(() => {
-                mode = '';
-                power = 0;
-                timerMinutes = 0;
-                isTimerSet = false;
-                updateDisplay();
-            }, 3000);
+            setTimeout(resetState, 3000);
         } else {
             displayText.textContent = `COOKING: ${mode} | Power: ${power} | ${mins}:${secs.toString().padStart(2, '0')}`;
         }
