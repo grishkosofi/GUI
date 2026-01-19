@@ -7,7 +7,7 @@ const stopButton = document.getElementById('stop-button');
 const backButton = document.getElementById('back-button');
 
 // Constants for knob rotation calculations
-const MODE_DEGREES_PER_STEP = 72; // 360° / 5 modes
+const MODE_DEGREES_PER_STEP = 45; // 360° / 8 modes
 const POWER_DEGREES_PER_LEVEL = 36; // 360° / 10 power levels
 const TIMER_DEGREES_PER_STEP = 6; // For timer granularity
 
@@ -27,7 +27,7 @@ let isCooking = false;
 let countdownInterval = null;
 
 // Available modes
-const modes = ['Forced air', 'Forced air + MW', 'Grill', 'Turbo Grill', 'Grill + MW'];
+const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Grill + air'];
 
 // Knob rotation handler with shared event listeners
 let activeKnob = null;
