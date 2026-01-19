@@ -16,6 +16,7 @@ const SHORT_MESSAGE_TIMEOUT = 1000;
 const MEDIUM_MESSAGE_TIMEOUT = 1500;
 const LONG_MESSAGE_TIMEOUT = 2000;
 const COMPLETION_MESSAGE_TIMEOUT = 3000;
+const TIME_ADJUSTMENT_TIMEOUT = 20000; // 20 seconds
 
 // State variables
 let mode = '';
@@ -25,6 +26,15 @@ let timerMinutes = 0;
 let isTimerSet = false;
 let isCooking = false;
 let countdownInterval = null;
+
+// Clock and display mode state variables
+let displayMode = 'clock'; // 'clock', 'modeSelection', 'timeAdjustment'
+let clockInterval = null;
+let currentTime = new Date();
+let tempTime = null; // Temporary time during adjustment
+let timeAdjustmentTimeout = null;
+let leftKnobRotated = false;
+let rightKnobRotated = false; // Track if right knob was rotated to show "change time"
 
 // Available modes
 const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Defrost'];
@@ -81,6 +91,42 @@ document.addEventListener('mouseup', () => {
     onRotateCallback = null;
 });
 
+// Initialize clock display
+function initializeClock() {
+    displayMode = 'clock';
+    updateClockDisplay();
+    startClockInterval();
+}
+
+// Start clock interval to update every second
+function startClockInterval() {
+    if (clockInterval) {
+        clearInterval(clockInterval);
+    }
+    clockInterval = setInterval(() => {
+        if (displayMode === 'clock') {
+            currentTime = new Date();
+            updateClockDisplay();
+        }
+    }, 1000);
+}
+
+// Stop clock interval
+function stopClockInterval() {
+    if (clockInterval) {
+        clearInterval(clockInterval);
+        clockInterval = null;
+    }
+}
+
+// Update clock display
+function updateClockDisplay() {
+    const hours = currentTime.getHours().toString().padStart(2, '0');
+    const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+    const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+    displayText.textContent = `${hours}:${minutes}:${seconds}`;
+}
+
 // Reset state to initial values
 function resetState() {
     mode = '';
@@ -88,7 +134,20 @@ function resetState() {
     power = 0;
     timerMinutes = 0;
     isTimerSet = false;
-    updateDisplay();
+    
+    // Reset display mode state variables
+    if (displayMode !== 'clock') {
+        displayMode = 'clock';
+        leftKnobRotated = false;
+        rightKnobRotated = false;
+        tempTime = null;
+        if (timeAdjustmentTimeout) {
+            clearTimeout(timeAdjustmentTimeout);
+            timeAdjustmentTimeout = null;
+        }
+        startClockInterval();
+    }
+    // Note: When already in clock mode, the clock interval will update the display
 }
 
 // Shared function to stop cooking process
@@ -103,6 +162,22 @@ function stopCooking() {
 
 // Update display
 function updateDisplay() {
+    if (displayMode === 'clock') {
+        updateClockDisplay();
+        return;
+    }
+    
+    if (displayMode === 'timeAdjustment') {
+        if (tempTime) {
+            const hours = tempTime.getHours().toString().padStart(2, '0');
+            const minutes = tempTime.getMinutes().toString().padStart(2, '0');
+            const seconds = tempTime.getSeconds().toString().padStart(2, '0');
+            displayText.textContent = `Set time: ${hours}:${minutes}:${seconds}`;
+        }
+        return;
+    }
+    
+    // Mode selection display
     if (isCooking) {
         displayText.textContent = `COOKING: ${mode} | Power: ${power} | Time: ${timerMinutes} min`;
     } else if (isTimerSet && timerMinutes > 0) {
@@ -118,6 +193,13 @@ function updateDisplay() {
 
 // Selection knob handler
 makeKnobRotatable(selectionKnob, (rotation) => {
+    // Mark that left knob has been rotated
+    if (!leftKnobRotated) {
+        leftKnobRotated = true;
+        displayMode = 'modeSelection';
+        stopClockInterval();
+    }
+    
     // Normalize rotation to 0-360 range
     const normalizedRotation = ((rotation % 360) + 360) % 360;
     
@@ -137,6 +219,31 @@ makeKnobRotatable(selectionKnob, (rotation) => {
 
 // Adjustment knob handler
 makeKnobRotatable(adjustmentKnob, (rotation) => {
+    // If in clock mode, show "change time" message and mark that right knob was rotated
+    if (displayMode === 'clock') {
+        displayText.textContent = 'change time';
+        rightKnobRotated = true;
+        return;
+    }
+    
+    // If in time adjustment mode, adjust the temp time
+    if (displayMode === 'timeAdjustment' && tempTime) {
+        // Normalize rotation to 0-360 range
+        const normalizedRotation = ((rotation % 360) + 360) % 360;
+        
+        // Use rotation to adjust time (each 6 degrees = 1 minute)
+        // Note: This is position-based (like a physical dial), not delta-based
+        // The knob's absolute position determines the time offset from current time
+        const minutesAdjustment = Math.floor(normalizedRotation / 6);
+        
+        // Apply adjustment to the temporary time (reset from currentTime for position-based adjustment)
+        tempTime = new Date(currentTime);
+        tempTime.setMinutes(tempTime.getMinutes() + minutesAdjustment);
+        
+        updateDisplay();
+        return;
+    }
+    
     if (!mode || mode === 'Off') {
         displayText.textContent = 'Please select a cooking mode!';
         return;
@@ -159,7 +266,45 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
 });
 
 // OK button - confirms power and allows setting timer, then starts cooking
+// Also handles time adjustment confirmation
 okButton.addEventListener('click', () => {
+    // If in time adjustment mode, save the new time
+    if (displayMode === 'timeAdjustment') {
+        if (tempTime) {
+            currentTime = new Date(tempTime);
+            tempTime = null;
+        }
+        displayMode = 'clock';
+        rightKnobRotated = false;
+        clearTimeout(timeAdjustmentTimeout);
+        timeAdjustmentTimeout = null;
+        startClockInterval();
+        return;
+    }
+    
+    // If in clock mode and right knob was rotated, enter time adjustment mode
+    if (displayMode === 'clock' && rightKnobRotated) {
+        displayMode = 'timeAdjustment';
+        tempTime = new Date(currentTime);
+        rightKnobRotated = false;
+        stopClockInterval();
+        
+        // Start 20-second timeout
+        if (timeAdjustmentTimeout) {
+            clearTimeout(timeAdjustmentTimeout);
+        }
+        timeAdjustmentTimeout = setTimeout(() => {
+            // Revert to previous time
+            tempTime = null;
+            displayMode = 'clock';
+            rightKnobRotated = false;
+            startClockInterval();
+        }, TIME_ADJUSTMENT_TIMEOUT);
+        
+        updateDisplay();
+        return;
+    }
+    
     if (!mode || mode === 'Off') {
         displayText.textContent = 'Please select a cooking mode!';
         setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
@@ -218,8 +363,16 @@ okButton.addEventListener('click', () => {
     }, 1000);
 });
 
-// Start button - begins cooking countdown
+// Start button - begins cooking countdown or shows "select the mode" message
 startButton.addEventListener('click', () => {
+    // If in clock mode, show "select the mode" message and switch to mode selection
+    if (displayMode === 'clock') {
+        displayMode = 'modeSelection';
+        stopClockInterval();
+        displayText.textContent = 'select the mode';
+        return;
+    }
+    
     if (!mode || mode === 'Off' || power === 0 || timerMinutes === 0) {
         displayText.textContent = 'Set mode, power, and timer first!';
         setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
@@ -272,11 +425,31 @@ stopButton.addEventListener('click', () => {
 });
 
 // Back button - resets to previous state or clears settings
+// Returns to clock display from time adjustment or mode selection
 // Note: Requires user to stop cooking first (via Stop button) to prevent accidental interruption
 backButton.addEventListener('click', () => {
     if (isCooking) {
         displayText.textContent = 'Stop cooking first!';
         setTimeout(updateDisplay, SHORT_MESSAGE_TIMEOUT);
+        return;
+    }
+    
+    // If in time adjustment mode, cancel and return to clock
+    if (displayMode === 'timeAdjustment') {
+        tempTime = null;
+        displayMode = 'clock';
+        rightKnobRotated = false;
+        clearTimeout(timeAdjustmentTimeout);
+        timeAdjustmentTimeout = null;
+        startClockInterval();
+        return;
+    }
+    
+    // If in mode selection, go back to clock display
+    if (displayMode === 'modeSelection') {
+        displayMode = 'clock';
+        leftKnobRotated = false;
+        startClockInterval();
         return;
     }
     
@@ -292,11 +465,13 @@ backButton.addEventListener('click', () => {
         displayText.textContent = 'Power cleared. Adjust mode if needed.';
         setTimeout(updateDisplay, MEDIUM_MESSAGE_TIMEOUT);
     } else {
-        // Reset everything
+        // Reset everything and go to clock
         resetState();
-        displayText.textContent = 'All settings cleared';
-        setTimeout(() => {
-            displayText.textContent = 'Select mode';
-        }, MEDIUM_MESSAGE_TIMEOUT);
+        displayMode = 'clock';
+        leftKnobRotated = false;
+        startClockInterval();
     }
 });
+
+// Initialize the display with clock on page load
+initializeClock();
