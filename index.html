@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Control Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="control-panel">
+        <!-- Left selection knob -->
+        <div id="selection-knob" class="knob">
+            <div class="sign">Forced air</div>
+            <div class="sign">Forced air + MW</div>
+            <div class="sign">Grill</div>
+            <div class="sign">Turbo Grill</div>
+            <div class="sign">Grill + MW</div>
+        </div>
+        <!-- Display screen -->
+        <div id="display">
+            <p id="display-text">Select mode</p>
+        </div>
+        <!-- Buttons and adjustment knob -->
+        <div id="control-buttons">
+            <button id="ok-button">OK</button>
+            <button id="start-button">Start</button>
+            <div id="adjustment-knob" class="knob"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
