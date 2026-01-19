@@ -90,6 +90,16 @@ function resetState() {
     updateDisplay();
 }
 
+// Shared function to stop cooking process
+function stopCooking() {
+    isCooking = false;
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    startButton.textContent = 'Start';
+}
+
 // Update display
 function updateDisplay() {
     if (isCooking) {
@@ -176,12 +186,7 @@ startButton.addEventListener('click', () => {
     
     if (isCooking) {
         // Stop cooking
-        isCooking = false;
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-        }
-        startButton.textContent = 'Start';
+        stopCooking();
         displayText.textContent = 'Cooking stopped';
         setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
         return;
@@ -215,12 +220,7 @@ startButton.addEventListener('click', () => {
 // Stop button - stops cooking process
 stopButton.addEventListener('click', () => {
     if (isCooking) {
-        isCooking = false;
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-        }
-        startButton.textContent = 'Start';
+        stopCooking();
         displayText.textContent = 'Cooking stopped';
         setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
     } else {
@@ -230,6 +230,7 @@ stopButton.addEventListener('click', () => {
 });
 
 // Back button - resets to previous state or clears settings
+// Note: Requires user to stop cooking first (via Stop button) to prevent accidental interruption
 backButton.addEventListener('click', () => {
     if (isCooking) {
         displayText.textContent = 'Stop cooking first!';
