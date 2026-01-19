@@ -84,6 +84,7 @@ document.addEventListener('mouseup', () => {
 // Reset state to initial values
 function resetState() {
     mode = '';
+    modeIndex = 0;
     power = 0;
     timerMinutes = 0;
     isTimerSet = false;
