@@ -139,7 +139,6 @@ okButton.addEventListener('click', () => {
     isTimerSet = true;
     timerMinutes = 0;
     displayText.textContent = 'Set timer with adjustment knob';
-    setTimeout(updateDisplay, 2000);
 });
 
 // Start button - begins cooking countdown
@@ -182,6 +181,7 @@ startButton.addEventListener('click', () => {
         
         if (remainingSeconds <= 0) {
             clearInterval(countdownInterval);
+            countdownInterval = null;
             isCooking = false;
             startButton.textContent = 'Start';
             displayText.textContent = 'DONE! Enjoy your meal!';
