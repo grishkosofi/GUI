@@ -3,6 +3,8 @@ const selectionKnob = document.getElementById('selection-knob');
 const adjustmentKnob = document.getElementById('adjustment-knob');
 const okButton = document.getElementById('ok-button');
 const startButton = document.getElementById('start-button');
+const stopButton = document.getElementById('stop-button');
+const backButton = document.getElementById('back-button');
 
 // Constants for knob rotation calculations
 const MODE_DEGREES_PER_STEP = 72; // 360° / 5 modes
@@ -202,4 +204,50 @@ startButton.addEventListener('click', () => {
             displayText.textContent = `COOKING: ${mode} | Power: ${power} | ${mins}:${secs.toString().padStart(2, '0')}`;
         }
     }, 1000);
+});
+
+// Stop button - stops cooking process
+stopButton.addEventListener('click', () => {
+    if (isCooking) {
+        isCooking = false;
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        startButton.textContent = 'Start';
+        displayText.textContent = 'Cooking stopped';
+        setTimeout(resetState, 2000);
+    } else {
+        displayText.textContent = 'Not cooking';
+        setTimeout(updateDisplay, 1000);
+    }
+});
+
+// Back button - resets to previous state or clears settings
+backButton.addEventListener('click', () => {
+    if (isCooking) {
+        displayText.textContent = 'Stop cooking first!';
+        setTimeout(updateDisplay, 1000);
+        return;
+    }
+    
+    if (isTimerSet) {
+        // Go back from timer setting to power setting
+        isTimerSet = false;
+        timerMinutes = 0;
+        displayText.textContent = 'Timer cleared. Back to power setting.';
+        setTimeout(updateDisplay, 1500);
+    } else if (power > 0) {
+        // Go back from power setting to mode selection
+        power = 0;
+        displayText.textContent = 'Power cleared. Adjust mode if needed.';
+        setTimeout(updateDisplay, 1500);
+    } else {
+        // Reset everything
+        resetState();
+        displayText.textContent = 'All settings cleared';
+        setTimeout(() => {
+            displayText.textContent = 'Select mode';
+        }, 1500);
+    }
 });
