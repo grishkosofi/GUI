@@ -16,6 +16,7 @@ const SHORT_MESSAGE_TIMEOUT = 1000;
 const MEDIUM_MESSAGE_TIMEOUT = 1500;
 const LONG_MESSAGE_TIMEOUT = 2000;
 const COMPLETION_MESSAGE_TIMEOUT = 3000;
+const TIME_ADJUSTMENT_TIMEOUT = 20000; // 20 seconds
 
 // State variables
 let mode = '';
@@ -33,6 +34,7 @@ let currentTime = new Date();
 let tempTime = null; // Temporary time during adjustment
 let timeAdjustmentTimeout = null;
 let leftKnobRotated = false;
+let rightKnobRotated = false; // Track if right knob was rotated to show "change time"
 
 // Available modes
 const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Defrost'];
@@ -204,9 +206,10 @@ makeKnobRotatable(selectionKnob, (rotation) => {
 
 // Adjustment knob handler
 makeKnobRotatable(adjustmentKnob, (rotation) => {
-    // If in clock mode, show "change time" message and switch to time adjustment preview
+    // If in clock mode, show "change time" message and mark that right knob was rotated
     if (displayMode === 'clock') {
         displayText.textContent = 'change time';
+        rightKnobRotated = true;
         return;
     }
     
@@ -218,7 +221,7 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
         // Use rotation to adjust time (each 6 degrees = 1 minute)
         const minutesAdjustment = Math.floor(normalizedRotation / 6);
         
-        // Create a new time based on current time plus adjustment
+        // Apply adjustment to the temporary time
         tempTime = new Date(currentTime);
         tempTime.setMinutes(tempTime.getMinutes() + minutesAdjustment);
         
@@ -257,16 +260,18 @@ okButton.addEventListener('click', () => {
             tempTime = null;
         }
         displayMode = 'clock';
+        rightKnobRotated = false;
         clearTimeout(timeAdjustmentTimeout);
         timeAdjustmentTimeout = null;
         startClockInterval();
         return;
     }
     
-    // If in clock mode and right knob was shown "change time", enter time adjustment mode
-    if (displayMode === 'clock' && displayText.textContent === 'change time') {
+    // If in clock mode and right knob was rotated, enter time adjustment mode
+    if (displayMode === 'clock' && rightKnobRotated) {
         displayMode = 'timeAdjustment';
         tempTime = new Date(currentTime);
+        rightKnobRotated = false;
         stopClockInterval();
         
         // Start 20-second timeout
@@ -278,7 +283,7 @@ okButton.addEventListener('click', () => {
             tempTime = null;
             displayMode = 'clock';
             startClockInterval();
-        }, 20000);
+        }, TIME_ADJUSTMENT_TIMEOUT);
         
         updateDisplay();
         return;
@@ -417,6 +422,7 @@ backButton.addEventListener('click', () => {
     if (displayMode === 'timeAdjustment') {
         tempTime = null;
         displayMode = 'clock';
+        rightKnobRotated = false;
         clearTimeout(timeAdjustmentTimeout);
         timeAdjustmentTimeout = null;
         startClockInterval();
