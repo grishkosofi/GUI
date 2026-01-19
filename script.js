@@ -3,11 +3,19 @@ const selectionKnob = document.getElementById('selection-knob');
 const adjustmentKnob = document.getElementById('adjustment-knob');
 const okButton = document.getElementById('ok-button');
 const startButton = document.getElementById('start-button');
+const stopButton = document.getElementById('stop-button');
+const backButton = document.getElementById('back-button');
 
 // Constants for knob rotation calculations
 const MODE_DEGREES_PER_STEP = 72; // 360° / 5 modes
 const POWER_DEGREES_PER_LEVEL = 36; // 360° / 10 power levels
 const TIMER_DEGREES_PER_STEP = 6; // For timer granularity
+
+// Constants for UI timeouts (in milliseconds)
+const SHORT_MESSAGE_TIMEOUT = 1000;
+const MEDIUM_MESSAGE_TIMEOUT = 1500;
+const LONG_MESSAGE_TIMEOUT = 2000;
+const COMPLETION_MESSAGE_TIMEOUT = 3000;
 
 // State variables
 let mode = '';
@@ -76,10 +84,21 @@ document.addEventListener('mouseup', () => {
 // Reset state to initial values
 function resetState() {
     mode = '';
+    modeIndex = 0;
     power = 0;
     timerMinutes = 0;
     isTimerSet = false;
     updateDisplay();
+}
+
+// Shared function to stop cooking process
+function stopCooking() {
+    isCooking = false;
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    startButton.textContent = 'Start';
 }
 
 // Update display
@@ -143,13 +162,13 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
 okButton.addEventListener('click', () => {
     if (!mode) {
         displayText.textContent = 'Please select mode first!';
-        setTimeout(updateDisplay, 2000);
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
     
     if (power === 0) {
         displayText.textContent = 'Please set power first!';
-        setTimeout(updateDisplay, 2000);
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
     
@@ -162,20 +181,15 @@ okButton.addEventListener('click', () => {
 startButton.addEventListener('click', () => {
     if (!mode || power === 0 || timerMinutes === 0) {
         displayText.textContent = 'Set mode, power, and timer first!';
-        setTimeout(updateDisplay, 2000);
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
     
     if (isCooking) {
         // Stop cooking
-        isCooking = false;
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-            countdownInterval = null;
-        }
-        startButton.textContent = 'Start';
+        stopCooking();
         displayText.textContent = 'Cooking stopped';
-        setTimeout(resetState, 2000);
+        setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
         return;
     }
     
@@ -197,9 +211,51 @@ startButton.addEventListener('click', () => {
             isCooking = false;
             startButton.textContent = 'Start';
             displayText.textContent = 'DONE! Enjoy your meal!';
-            setTimeout(resetState, 3000);
+            setTimeout(resetState, COMPLETION_MESSAGE_TIMEOUT);
         } else {
             displayText.textContent = `COOKING: ${mode} | Power: ${power} | ${mins}:${secs.toString().padStart(2, '0')}`;
         }
     }, 1000);
+});
+
+// Stop button - stops cooking process
+stopButton.addEventListener('click', () => {
+    if (isCooking) {
+        stopCooking();
+        displayText.textContent = 'Cooking stopped';
+        setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
+    } else {
+        displayText.textContent = 'Not cooking';
+        setTimeout(updateDisplay, SHORT_MESSAGE_TIMEOUT);
+    }
+});
+
+// Back button - resets to previous state or clears settings
+// Note: Requires user to stop cooking first (via Stop button) to prevent accidental interruption
+backButton.addEventListener('click', () => {
+    if (isCooking) {
+        displayText.textContent = 'Stop cooking first!';
+        setTimeout(updateDisplay, SHORT_MESSAGE_TIMEOUT);
+        return;
+    }
+    
+    if (isTimerSet) {
+        // Go back from timer setting to power setting
+        isTimerSet = false;
+        timerMinutes = 0;
+        displayText.textContent = 'Timer cleared. Back to power setting.';
+        setTimeout(updateDisplay, MEDIUM_MESSAGE_TIMEOUT);
+    } else if (power > 0) {
+        // Go back from power setting to mode selection
+        power = 0;
+        displayText.textContent = 'Power cleared. Adjust mode if needed.';
+        setTimeout(updateDisplay, MEDIUM_MESSAGE_TIMEOUT);
+    } else {
+        // Reset everything
+        resetState();
+        displayText.textContent = 'All settings cleared';
+        setTimeout(() => {
+            displayText.textContent = 'Select mode';
+        }, MEDIUM_MESSAGE_TIMEOUT);
+    }
 });

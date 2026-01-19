@@ -126,9 +126,11 @@ body {
 }
 
 #control-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 20px;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 button {
@@ -162,3 +164,13 @@ button:active {
 #start-button:hover {
     background: linear-gradient(145deg, #3a9a3a, #2a7a2a);
 }
+
+#stop-button {
+    background: linear-gradient(145deg, #8a2a2a, #6a1a1a);
+}
+
+#stop-button:hover {
+    background: linear-gradient(145deg, #9a3a3a, #7a2a2a);
+}
+
+/* OK and Back buttons use default button styling (gray gradient) */
