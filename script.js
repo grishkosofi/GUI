@@ -146,9 +146,8 @@ function resetState() {
             timeAdjustmentTimeout = null;
         }
         startClockInterval();
-    } else {
-        updateDisplay();
     }
+    // Note: When already in clock mode, the clock interval will update the display
 }
 
 // Shared function to stop cooking process
@@ -233,9 +232,11 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
         const normalizedRotation = ((rotation % 360) + 360) % 360;
         
         // Use rotation to adjust time (each 6 degrees = 1 minute)
+        // Note: This is position-based (like a physical dial), not delta-based
+        // The knob's absolute position determines the time offset from current time
         const minutesAdjustment = Math.floor(normalizedRotation / 6);
         
-        // Apply adjustment to the temporary time
+        // Apply adjustment to the temporary time (reset from currentTime for position-based adjustment)
         tempTime = new Date(currentTime);
         tempTime.setMinutes(tempTime.getMinutes() + minutesAdjustment);
         
