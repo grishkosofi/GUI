@@ -158,7 +158,7 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
     }
 });
 
-// OK button - confirms power and allows setting timer
+// OK button - confirms power and allows setting timer, then starts cooking
 okButton.addEventListener('click', () => {
     if (!mode) {
         displayText.textContent = 'Please select mode first!';
@@ -172,9 +172,50 @@ okButton.addEventListener('click', () => {
         return;
     }
     
-    isTimerSet = true;
-    timerMinutes = 0;
-    displayText.textContent = 'Set timer with adjustment knob';
+    if (!isTimerSet) {
+        // First click: confirm power and allow setting timer
+        isTimerSet = true;
+        timerMinutes = 0;
+        displayText.textContent = 'Set timer with adjustment knob';
+        return;
+    }
+    
+    // Second click: start cooking if timer is set
+    if (timerMinutes === 0) {
+        displayText.textContent = 'Please set timer first!';
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
+        return;
+    }
+    
+    if (isCooking) {
+        displayText.textContent = 'Already cooking!';
+        setTimeout(updateDisplay, SHORT_MESSAGE_TIMEOUT);
+        return;
+    }
+    
+    // Start cooking
+    isCooking = true;
+    startButton.textContent = 'Stop';
+    
+    let remainingSeconds = timerMinutes * 60;
+    
+    countdownInterval = setInterval(() => {
+        remainingSeconds--;
+        
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        
+        if (remainingSeconds <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            isCooking = false;
+            startButton.textContent = 'Start';
+            displayText.textContent = 'DONE! Enjoy your meal!';
+            setTimeout(resetState, COMPLETION_MESSAGE_TIMEOUT);
+        } else {
+            displayText.textContent = `COOKING: ${mode} | Power: ${power} | ${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+    }, 1000);
 });
 
 // Start button - begins cooking countdown
