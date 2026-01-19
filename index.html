@@ -6,23 +6,36 @@
 </head>
 <body>
     <div id="control-panel">
-        <!-- Left selection knob -->
-        <div id="selection-knob" class="knob">
-            <div class="sign">Forced air</div>
-            <div class="sign">Forced air + MW</div>
-            <div class="sign">Grill</div>
-            <div class="sign">Turbo Grill</div>
-            <div class="sign">Grill + MW</div>
+        <div class="panel-row">
+            <!-- Left selection knob with signs -->
+            <div class="knob-container">
+                <div class="sign sign-top">Forced air</div>
+                <div class="sign sign-right">Forced air + MW</div>
+                <div class="sign sign-bottom">Grill</div>
+                <div class="sign sign-left-bottom">Turbo Grill</div>
+                <div class="sign sign-left-top">Grill + MW</div>
+                <div id="selection-knob" class="knob" data-rotation="0">
+                    <div class="knob-indicator"></div>
+                </div>
+            </div>
+            
+            <!-- Display screen -->
+            <div id="display">
+                <div id="display-text">Select mode</div>
+            </div>
+            
+            <!-- Right adjustment knob -->
+            <div class="knob-container">
+                <div id="adjustment-knob" class="knob" data-rotation="0">
+                    <div class="knob-indicator"></div>
+                </div>
+            </div>
         </div>
-        <!-- Display screen -->
-        <div id="display">
-            <p id="display-text">Select mode</p>
-        </div>
-        <!-- Buttons and adjustment knob -->
+        
+        <!-- Control buttons -->
         <div id="control-buttons">
             <button id="ok-button">OK</button>
             <button id="start-button">Start</button>
-            <div id="adjustment-knob" class="knob"></div>
         </div>
     </div>
     <script src="script.js"></script>
