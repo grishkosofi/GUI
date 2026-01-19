@@ -68,53 +68,53 @@ body {
     font-weight: bold;
     text-align: center;
     white-space: nowrap;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 3px 6px;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 2px 6px;
     border-radius: 3px;
 }
 
 .sign-top {
-    top: 0;
+    top: 15%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .sign-top-right {
-    top: 5%;
-    right: 5%;
+    top: 20%;
+    right: 15%;
 }
 
 .sign-right {
     top: 50%;
-    right: 0;
+    right: 5%;
     transform: translateY(-50%);
 }
 
 .sign-bottom-right {
-    bottom: 5%;
-    right: 5%;
+    bottom: 20%;
+    right: 15%;
 }
 
 .sign-bottom {
-    bottom: 0;
+    bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .sign-bottom-left {
-    bottom: 5%;
-    left: 5%;
+    bottom: 20%;
+    left: 15%;
 }
 
 .sign-left {
     top: 50%;
-    left: 0;
+    left: 5%;
     transform: translateY(-50%);
 }
 
 .sign-top-left {
-    top: 5%;
-    left: 5%;
+    top: 20%;
+    left: 15%;
 }
 
 #display-row {
@@ -199,4 +199,8 @@ button:active {
     background: linear-gradient(145deg, #9a3a3a, #7a2a2a);
 }
 
+.sign img {
+    height: 24px;
+    width: 24px;
+}
 /* OK and Back buttons use default button styling (gray gradient) */
