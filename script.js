@@ -27,7 +27,7 @@ let isCooking = false;
 let countdownInterval = null;
 
 // Available modes
-const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Grill + air'];
+const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Defrost'];
 
 // Knob rotation handler with shared event listeners
 let activeKnob = null;
