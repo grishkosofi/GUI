@@ -230,7 +230,7 @@ startButton.addEventListener('click', () => {
         // Stop cooking
         stopCooking();
         displayText.textContent = 'Cooking stopped';
-        setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
     
@@ -264,7 +264,7 @@ stopButton.addEventListener('click', () => {
     if (isCooking) {
         stopCooking();
         displayText.textContent = 'Cooking stopped';
-        setTimeout(resetState, LONG_MESSAGE_TIMEOUT);
+        setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
     } else {
         displayText.textContent = 'Not cooking';
         setTimeout(updateDisplay, SHORT_MESSAGE_TIMEOUT);
