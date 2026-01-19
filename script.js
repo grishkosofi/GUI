@@ -134,7 +134,21 @@ function resetState() {
     power = 0;
     timerMinutes = 0;
     isTimerSet = false;
-    updateDisplay();
+    
+    // Reset display mode state variables
+    if (displayMode !== 'clock') {
+        displayMode = 'clock';
+        leftKnobRotated = false;
+        rightKnobRotated = false;
+        tempTime = null;
+        if (timeAdjustmentTimeout) {
+            clearTimeout(timeAdjustmentTimeout);
+            timeAdjustmentTimeout = null;
+        }
+        startClockInterval();
+    } else {
+        updateDisplay();
+    }
 }
 
 // Shared function to stop cooking process
@@ -282,6 +296,7 @@ okButton.addEventListener('click', () => {
             // Revert to previous time
             tempTime = null;
             displayMode = 'clock';
+            rightKnobRotated = false;
             startClockInterval();
         }, TIME_ADJUSTMENT_TIMEOUT);
         
