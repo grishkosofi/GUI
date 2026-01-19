@@ -16,44 +16,54 @@ let countdownInterval = null;
 // Available modes
 const modes = ['Forced air', 'Forced air + MW', 'Grill', 'Turbo Grill', 'Grill + MW'];
 
-// Knob rotation handler
-function makeKnobRotatable(knob, onRotate) {
-    let isDragging = false;
-    let startAngle = 0;
-    let currentRotation = 0;
+// Knob rotation handler with shared event listeners
+let activeKnob = null;
+let isDragging = false;
+let startAngle = 0;
+let currentRotation = 0;
+let onRotateCallback = null;
 
+function makeKnobRotatable(knob, onRotate) {
     knob.addEventListener('mousedown', (e) => {
+        activeKnob = knob;
         isDragging = true;
+        currentRotation = parseFloat(knob.dataset.rotation) || 0;
+        onRotateCallback = onRotate;
+        
         const rect = knob.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
     });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        
-        const rect = knob.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        
-        let deltaAngle = currentAngle - startAngle;
-        currentRotation += deltaAngle;
-        startAngle = currentAngle;
-        
-        knob.style.transform = `rotate(${currentRotation}deg)`;
-        knob.dataset.rotation = currentRotation;
-        
-        if (onRotate) {
-            onRotate(currentRotation);
-        }
-    });
-
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
 }
+
+// Shared mousemove handler
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging || !activeKnob) return;
+    
+    const rect = activeKnob.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    
+    let deltaAngle = currentAngle - startAngle;
+    currentRotation += deltaAngle;
+    startAngle = currentAngle;
+    
+    activeKnob.style.transform = `rotate(${currentRotation}deg)`;
+    activeKnob.dataset.rotation = currentRotation;
+    
+    if (onRotateCallback) {
+        onRotateCallback(currentRotation);
+    }
+});
+
+// Shared mouseup handler
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    activeKnob = null;
+    onRotateCallback = null;
+});
 
 // Update display
 function updateDisplay() {
@@ -105,7 +115,7 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
         if (power > 10) power = 10;
         updateDisplay();
     } else {
-        // Setting timer after OK pressed (0-60 minutes in steps of 5)
+        // Setting timer after OK pressed (0-300 minutes in steps of 5)
         timerMinutes = Math.floor(normalizedRotation / 6) * 5;
         if (timerMinutes > 300) timerMinutes = 300; // Max 5 hours
         updateDisplay();
@@ -169,7 +179,6 @@ startButton.addEventListener('click', () => {
         
         const mins = Math.floor(remainingSeconds / 60);
         const secs = remainingSeconds % 60;
-        timerMinutes = mins + (secs > 0 ? 1 : 0); // Round up for display
         
         if (remainingSeconds <= 0) {
             clearInterval(countdownInterval);
