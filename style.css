@@ -79,10 +79,20 @@ body {
     transform: translateX(-50%);
 }
 
+.sign-top-right {
+    top: 5%;
+    right: 5%;
+}
+
 .sign-right {
-    top: 20%;
+    top: 50%;
     right: 0;
-    transform: translateX(10px);
+    transform: translateY(-50%);
+}
+
+.sign-bottom-right {
+    bottom: 5%;
+    right: 5%;
 }
 
 .sign-bottom {
@@ -91,16 +101,20 @@ body {
     transform: translateX(-50%);
 }
 
-.sign-left-bottom {
-    bottom: 20%;
-    left: 0;
-    transform: translateX(-10px);
+.sign-bottom-left {
+    bottom: 5%;
+    left: 5%;
 }
 
-.sign-left-top {
-    top: 20%;
+.sign-left {
+    top: 50%;
     left: 0;
-    transform: translateX(-10px);
+    transform: translateY(-50%);
+}
+
+.sign-top-left {
+    top: 5%;
+    left: 5%;
 }
 
 #display-row {

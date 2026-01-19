@@ -7,7 +7,7 @@ const stopButton = document.getElementById('stop-button');
 const backButton = document.getElementById('back-button');
 
 // Constants for knob rotation calculations
-const MODE_DEGREES_PER_STEP = 72; // 360° / 5 modes
+const MODE_DEGREES_PER_STEP = 45; // 360° / 8 modes
 const POWER_DEGREES_PER_LEVEL = 36; // 360° / 10 power levels
 const TIMER_DEGREES_PER_STEP = 6; // For timer granularity
 
@@ -27,7 +27,7 @@ let isCooking = false;
 let countdownInterval = null;
 
 // Available modes
-const modes = ['Forced air', 'Forced air + MW', 'Grill', 'Turbo Grill', 'Grill + MW'];
+const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Grill + air'];
 
 // Knob rotation handler with shared event listeners
 let activeKnob = null;
@@ -137,8 +137,8 @@ makeKnobRotatable(selectionKnob, (rotation) => {
 
 // Adjustment knob handler
 makeKnobRotatable(adjustmentKnob, (rotation) => {
-    if (!mode) {
-        displayText.textContent = 'Please select mode first!';
+    if (!mode || mode === 'Off') {
+        displayText.textContent = 'Please select a cooking mode!';
         return;
     }
     
@@ -160,8 +160,8 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
 
 // OK button - confirms power and allows setting timer, then starts cooking
 okButton.addEventListener('click', () => {
-    if (!mode) {
-        displayText.textContent = 'Please select mode first!';
+    if (!mode || mode === 'Off') {
+        displayText.textContent = 'Please select a cooking mode!';
         setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
@@ -220,7 +220,7 @@ okButton.addEventListener('click', () => {
 
 // Start button - begins cooking countdown
 startButton.addEventListener('click', () => {
-    if (!mode || power === 0 || timerMinutes === 0) {
+    if (!mode || mode === 'Off' || power === 0 || timerMinutes === 0) {
         displayText.textContent = 'Set mode, power, and timer first!';
         setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
