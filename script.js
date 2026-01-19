@@ -138,7 +138,7 @@ makeKnobRotatable(selectionKnob, (rotation) => {
 // Adjustment knob handler
 makeKnobRotatable(adjustmentKnob, (rotation) => {
     if (!mode || mode === 'Off') {
-        displayText.textContent = 'Please select mode first!';
+        displayText.textContent = 'Please select a cooking mode!';
         return;
     }
     
@@ -161,7 +161,7 @@ makeKnobRotatable(adjustmentKnob, (rotation) => {
 // OK button - confirms power and allows setting timer, then starts cooking
 okButton.addEventListener('click', () => {
     if (!mode || mode === 'Off') {
-        displayText.textContent = 'Please select mode first!';
+        displayText.textContent = 'Please select a cooking mode!';
         setTimeout(updateDisplay, LONG_MESSAGE_TIMEOUT);
         return;
     }
