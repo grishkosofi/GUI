@@ -52,6 +52,9 @@ document.addEventListener('mousemove', (e) => {
     const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
     
     let deltaAngle = currentAngle - startAngle;
+    // Handle 360°/0° boundary crossing
+    if (deltaAngle > 180) deltaAngle -= 360;
+    if (deltaAngle < -180) deltaAngle += 360;
     currentRotation += deltaAngle;
     startAngle = currentAngle;
     
