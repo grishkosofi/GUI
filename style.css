@@ -80,8 +80,8 @@ body {
 }
 
 .sign-top-right {
-    top: 10%;
-    right: 10%;
+    top: 5%;
+    right: 5%;
 }
 
 .sign-right {
@@ -91,8 +91,8 @@ body {
 }
 
 .sign-bottom-right {
-    bottom: 10%;
-    right: 10%;
+    bottom: 5%;
+    right: 5%;
 }
 
 .sign-bottom {
@@ -102,8 +102,8 @@ body {
 }
 
 .sign-bottom-left {
-    bottom: 10%;
-    left: 10%;
+    bottom: 5%;
+    left: 5%;
 }
 
 .sign-left {
@@ -113,8 +113,8 @@ body {
 }
 
 .sign-top-left {
-    top: 10%;
-    left: 10%;
+    top: 5%;
+    left: 5%;
 }
 
 #display-row {
