@@ -19,9 +19,24 @@
                 </div>
             </div>
             
-            <!-- Display screen -->
-            <div id="display">
-                <div id="display-text">Select mode</div>
+            <!-- Display screen with side buttons -->
+            <div id="display-row">
+                <!-- Left buttons -->
+                <div class="button-column button-column-left">
+                    <button id="stop-button">Stop</button>
+                    <button id="back-button">Back</button>
+                </div>
+                
+                <!-- Display screen -->
+                <div id="display">
+                    <div id="display-text">Select mode</div>
+                </div>
+                
+                <!-- Right buttons -->
+                <div class="button-column button-column-right">
+                    <button id="ok-button">OK</button>
+                    <button id="start-button">Start</button>
+                </div>
             </div>
             
             <!-- Right adjustment knob -->
@@ -30,14 +45,6 @@
                     <div class="knob-indicator"></div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Control buttons -->
-        <div id="control-buttons">
-            <button id="start-button">Start</button>
-            <button id="stop-button">Stop</button>
-            <button id="ok-button">OK</button>
-            <button id="back-button">Back</button>
         </div>
     </div>
     <script src="script.js"></script>
