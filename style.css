@@ -172,3 +172,5 @@ button:active {
 #stop-button:hover {
     background: linear-gradient(145deg, #9a3a3a, #7a2a2a);
 }
+
+/* OK and Back buttons use default button styling (gray gradient) */
