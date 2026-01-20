@@ -401,7 +401,7 @@ startButton.addEventListener('click', () => {
     
     // Start cooking
     isCooking = true;
-    startButton.textContent = 'Stop';
+    startButton.textContent = 'Start';
     
     let remainingSeconds = timerMinutes * 60;
     
