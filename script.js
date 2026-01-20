@@ -35,6 +35,7 @@ let tempTime = null; // Temporary time during adjustment
 let timeAdjustmentTimeout = null;
 let leftKnobRotated = false;
 let rightKnobRotated = false; // Track if right knob was rotated to show "change time"
+let isManualTime = false; // Track if time was manually adjusted (vs using system time)
 
 // Available modes
 const modes = ['Off', 'MW', 'MW + air', 'Grill', 'Turbo Grill', 'Grill + MW', 'Grill + MW + air', 'Defrost'];
@@ -105,7 +106,13 @@ function startClockInterval() {
     }
     clockInterval = setInterval(() => {
         if (displayMode === 'clock') {
-            currentTime = new Date();
+            // Only update from system time if not using manual time
+            if (!isManualTime) {
+                currentTime = new Date();
+            } else {
+                // For manual time, just increment by 1 second
+                currentTime = new Date(currentTime.getTime() + 1000);
+            }
             updateClockDisplay();
         }
     }, 1000);
@@ -145,6 +152,7 @@ function resetState() {
             clearTimeout(timeAdjustmentTimeout);
             timeAdjustmentTimeout = null;
         }
+        // Don't reset isManualTime - preserve manual time setting
         startClockInterval();
     }
     // Note: When already in clock mode, the clock interval will update the display
@@ -273,11 +281,14 @@ okButton.addEventListener('click', () => {
         if (tempTime) {
             currentTime = new Date(tempTime);
             tempTime = null;
+            isManualTime = true; // Mark that we're using manually adjusted time
         }
         displayMode = 'clock';
         rightKnobRotated = false;
-        clearTimeout(timeAdjustmentTimeout);
-        timeAdjustmentTimeout = null;
+        if (timeAdjustmentTimeout) {
+            clearTimeout(timeAdjustmentTimeout);
+            timeAdjustmentTimeout = null;
+        }
         startClockInterval();
         return;
     }
@@ -294,10 +305,11 @@ okButton.addEventListener('click', () => {
             clearTimeout(timeAdjustmentTimeout);
         }
         timeAdjustmentTimeout = setTimeout(() => {
-            // Revert to previous time
+            // Revert to previous time (cancel adjustment)
             tempTime = null;
             displayMode = 'clock';
             rightKnobRotated = false;
+            // Don't change isManualTime flag - keep existing time setting
             startClockInterval();
         }, TIME_ADJUSTMENT_TIMEOUT);
         
@@ -439,8 +451,11 @@ backButton.addEventListener('click', () => {
         tempTime = null;
         displayMode = 'clock';
         rightKnobRotated = false;
-        clearTimeout(timeAdjustmentTimeout);
-        timeAdjustmentTimeout = null;
+        if (timeAdjustmentTimeout) {
+            clearTimeout(timeAdjustmentTimeout);
+            timeAdjustmentTimeout = null;
+        }
+        // Don't change isManualTime flag - keep existing time setting
         startClockInterval();
         return;
     }
@@ -449,6 +464,7 @@ backButton.addEventListener('click', () => {
     if (displayMode === 'modeSelection') {
         displayMode = 'clock';
         leftKnobRotated = false;
+        // Don't change isManualTime flag - keep existing time setting
         startClockInterval();
         return;
     }
